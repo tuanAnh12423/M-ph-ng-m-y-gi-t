@@ -33,7 +33,8 @@ window.LK3D = (function(){
  };
  const wireMat=c=>{const k=new T.Color(c);k.offsetHSL(0,0.15,-0.06);return M(k.getHex(),{roughness:.6,envMapIntensity:.25})};
  function pickable(o,data){o.userData.pick=data;return o}
- function label(text,pos){const d=document.createElement('div');d.className='m3l';d.textContent=text;el.appendChild(d);labels.push({d,p:new T.Vector3(...pos)})}
+ function label(text,pos,pk){let d;if(pk){d=document.createElement('button');d.className='m3l b';d.onclick=e=>{e.stopPropagation();if(onPick)onPick(pk)}}else{d=document.createElement('div');d.className='m3l'}
+  d.textContent=text;el.appendChild(d);labels.push({d,p:new T.Vector3(...pos)})}
  function clearLabels(){labels.splice(0).forEach(L=>L.d.remove())}
 
  /* ---------- sân khấu ---------- */
@@ -92,7 +93,7 @@ window.LK3D = (function(){
   const hit=new T.Mesh(new T.SphereGeometry(0.6,8,6),new T.MeshBasicMaterial({visible:false}));g.add(hit);
   pickable(g,{pin:id});root.add(g);
   PIN[id]=new T.Vector3(pos[0],pos[1]+0.45,pos[2]);
-  if(lbl)label(lbl,[pos[0],pos[1]+1.6,pos[2]]);
+  if(lbl)label(lbl,[pos[0],pos[1]+1.6,pos[2]],{pin:id});
   const i=S.probe.indexOf(id);if(i>=0)root.add(probe(i?0x111111:0xe60012,PIN[id]));
   return g;
  }
@@ -137,11 +138,11 @@ window.LK3D = (function(){
   if(!opened){ // ống cấp còn vặn vào đầu vào → chưa thấy lưới lọc
    const nut=cyl(2.1,2.1,2.2,MT.chrome,6);nut.rotation.z=Math.PI/2;at(nut,-7.9,2.4,0);g.add(nut);
    g.add(tube([[-9,2.4,0],[-12,2.4,0],[-16,1,4],[-20,0.8,9]],1,M(0x9aa3ab,{roughness:.5,metalness:.2})));
-   label('Đầu nối ống (tháo bằng cờ lê)',[-8,5.2,0]);
+   label('Đầu nối ống (tháo bằng cờ lê)',[-8,5.2,0],{spot:'van:luoi-loc'});
   }else{
    const nut=cyl(2.1,2.1,2.2,MT.chrome,6);nut.rotation.z=Math.PI/2;nut.rotation.y=0.6;at(nut,-13,1.2,6);g.add(nut);
    g.add(tube([[-14,1.1,6.5],[-16,0.9,8],[-20,0.8,10]],1,M(0x9aa3ab,{roughness:.5,metalness:.2})));
-   label(dirty?'Lưới lọc: bám cặn':'Lưới lọc: sạch',[-7.2,4.6,0]);
+   label(dirty?'Lưới lọc: bám cặn':'Lưới lọc: sạch',[-7.2,4.6,0],{spot:'van:luoi-loc'});
   }
   pickable(g,{spot:'van:luoi-loc'});root.add(g);
   frame([-15,15,21],[-1,5,0]);
@@ -171,7 +172,7 @@ window.LK3D = (function(){
    const plug=new T.Group();at(plug,cx,2.6+lift,z);plug.rotation.x=-tilt;
    plug.add(rbox(w-0.1,1.1,1.3,0.08,M(0xfafaf6,{roughness:.45})));
    pickable(plug,{spot:'pcb:'+j.id});root.add(plug);
-   label(j.id+(loose?' bị lỏng':''),[cx,4.2+lift,z+1.2]);
+   label(j.id+(loose?' bị lỏng':''),[cx,4.2+lift,z+1.2],{spot:'pcb:'+j.id});
    j.day.forEach((d,i)=>{
     const px=x+0.7+0.55+i*1.1,top=3.2+lift;
     pin(j.id+'-'+d[0],[px,top,z+(loose?-0.1:0)],cyl(0.16,0.16,0.5,MT.gold,10),'');
@@ -219,7 +220,7 @@ window.LK3D = (function(){
   }
   g.traverse(x=>{if(x.isMesh)x.castShadow=true});
   pickable(g,{spot:'phao:ong'});root.add(g);
-  label('Ống áp suất',[-6.5,11.8,-4]);
+  label('Ống áp suất',[-6.5,11.8,-4],{spot:'phao:ong'});
   frame([11,13,19],[0,4.5,0]);
  }
 
@@ -239,7 +240,7 @@ window.LK3D = (function(){
   const lh=new T.Mesh(new T.BoxGeometry(3,3,8),new T.MeshBasicMaterial({visible:false}));at(lh,0,0.5,2.8);lev.add(lh);
   lev.rotation.y=closed?1.25:0;
   pickable(lev,{spot:'voi:tay-van'});root.add(lev);
-  label(closed?'Tay vặn (đang gần khóa)':'Tay vặn',[0,10,1]);
+  label(closed?'Tay vặn (đang gần khóa)':'Tay vặn',[0,10,1],{spot:'voi:tay-van'});
   // đầu nối ống / đồng hồ áp lực
   const nutG=new T.Group();const nut=cyl(1.3,1.3,1.6,MT.chrome,6);at(nut,0,1.9,1);nutG.add(nut);
   pickable(nutG,{spot:'voi:dau-noi'});root.add(nutG);
@@ -255,7 +256,7 @@ window.LK3D = (function(){
    label('Áp lực: '+S.gv+' MPa',[0,0.6,4.5]);
   }else if(!checked){
    root.add(tube([[0,1,1],[0,-3,1],[3,-8,3],[9,-12,6],[16,-14,8]],1,M(0x9aa3ab,{roughness:.5,metalness:.2})));
-   label('Đầu nối ống',[3.2,2,1]);
+   label('Đầu nối ống',[3.2,2,1],{spot:'voi:dau-noi'});
   }
   if(checked&&!gauge){ // đã tháo ống, mở vòi xả thử vào xô
    const bucket=mesh(new T.CylinderGeometry(5,4,8,32,1,true),M(0x2b6cb0,{roughness:.5,side:T.DoubleSide}));at(bucket,0,-12,2);root.add(bucket);

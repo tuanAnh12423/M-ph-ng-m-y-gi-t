@@ -37,7 +37,10 @@ window.May3D = (function(){
  const tube = (pts,r,m)=>mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(...p))),48,r,10,false),m);
  function pickable(o,data){o.userData.pick=data;o.traverse(x=>{if(x.isMesh)picks.push(x)});return o}
  function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.userData.draw=()=>{draw(c.getContext('2d'),w,h);t.needsUpdate=true};t.userData.draw();return t}
- function label(text,pos,side){const d=document.createElement('div');d.className='m3l';d.textContent=text;el.appendChild(d);const L={d,p:new T.Vector3(...pos),side};labels.push(L);return L}
+ function btnEl(text,pk){const b=document.createElement('button');b.className='m3l b';b.style.position='static';b.style.transform='none';b.textContent=text;b.onclick=e=>{e.stopPropagation();if(onPick)onPick(pk)};return b}
+ function label(text,pos,side,pk){let d;if(pk){d=btnEl(text,pk);d.style.position='';d.style.transform=''}else{d=document.createElement('div');d.className='m3l';d.textContent=text}
+  el.appendChild(d);const L={d,p:new T.Vector3(...pos),side};labels.push(L);return L}
+ function labelGroup(items,pos,side){const d=document.createElement('div');d.className='m3l m3g';items.forEach(([t,pk])=>d.appendChild(btnEl(t,pk)));el.appendChild(d);const L={d,p:new T.Vector3(...pos),side};labels.push(L);return L}
 
  /* ---------- dựng cảnh ---------- */
  function build(){
@@ -129,8 +132,8 @@ window.May3D = (function(){
   // dây nguồn ra sau máy
   O.cordStart=[0.2,0.12,-0.31];
   // nhãn
-  O.lNut=label('Nguồn  ·  Start',[-0.135,cy+0.08,-0.15],'front');
-  O.lNap=label('Nắp kỹ thuật',[0,cy+0.1,-0.33],'back');
+  O.lNut=labelGroup([['Nguồn',{act:'nguon'}],['Start',{act:'start'}]],[-0.135,cy+0.08,-0.15],'front');
+  O.lNap=label('Nắp kỹ thuật',[0,cy+0.1,-0.33],'back',{act:'nap'});
  }
  function btn(x,y,act){
   const b=cyl(0.022,0.022,0.012,M(0xc9ced3,{roughness:.3,metalness:.3}),24);O.btnMat=O.btnMat||[];O.btnMat.push(b);b.rotation.x=Math.PI/2;at(b,x,y,-0.148);O.console.add(b);
@@ -157,7 +160,7 @@ window.May3D = (function(){
   pickable(g,{part:'voi'});O.faucet=g;
   // ống cấp từ vòi tới van (sau máy)
   scene.add(tube([[-0.56,1.115,-0.22],[-0.55,0.95,-0.32],[-0.42,0.9,-0.45],[-0.26,0.97,-0.38],[-0.2,0.985,-0.335]],0.011,MAT.hose));
-  O.lVoi=label('Vòi nước',[-0.56,1.29,-0.22],'front');
+  O.lVoi=label('Vòi nước',[-0.56,1.29,-0.22],'front',{part:'voi'});
  }
  function buildSocket(){
   const g=new T.Group();scene.add(g);
@@ -166,7 +169,7 @@ window.May3D = (function(){
   const hit=new T.Mesh(new T.BoxGeometry(0.12,0.16,0.14),new T.MeshBasicMaterial({visible:false}));at(hit,-0.6,0.45,0.18);g.add(hit);
   pickable(g,{act:'phich'});
   O.plug=new T.Group();scene.add(O.plug);
-  O.lSocket=label('Ổ điện',[-0.62,0.55,0.18],'front');
+  O.lSocket=label('Ổ điện',[-0.62,0.55,0.18],'front',{act:'phich'});
  }
  function placePlug(on){
   for(let i=picks.length-1;i>=0;i--)if(picks[i].userData.plug)picks.splice(i,1);
@@ -197,7 +200,7 @@ window.May3D = (function(){
    pickable(g,{part:p});g.traverse(x=>{if(x.isMesh)x.userData.inside=1});
    O.inside.add(g);pos[p]=D;
    const nm=(window.PARTS&&PARTS[p]?PARTS[p].ten:p).split(' (')[0];
-   const lb=label(nm,[D.pos[0],D.pos[1]+0.07,D.pos[2]-0.06],'back');O.partLabels.push(lb);
+   const lb=label(nm,[D.pos[0],D.pos[1]+0.07,D.pos[2]-0.06],'back',{part:p});O.partLabels.push(lb);
   });
   // dây từ linh kiện về jack PCB
   if(pos.pcb)(E.jack||[]).forEach((j,ji)=>{const D=pos[j.noi];if(!D)return;

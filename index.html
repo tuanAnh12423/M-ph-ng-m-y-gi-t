@@ -85,6 +85,21 @@ body.fs{overflow:hidden}body.fs header{display:none}body.fs main{max-width:none;
  #s-lab.fs .lab{grid-area:lab;height:100%}#s-lab.fs .status{grid-area:st}#s-lab.fs .bar{grid-area:bar}#s-lab.fs .out{grid-area:out}#s-lab.fs .inst{grid-area:inst;align-self:start}
  #s-lab.fs .inst svg{height:auto;width:100%;max-height:none}
 }
+.acts{margin-top:10px}
+.ag{font-size:13px;font-weight:600;color:var(--mut);margin:8px 0 5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:42px;padding:0 13px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 14px "Be Vietnam Pro",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none}
+.chip:active{transform:scale(.97)}
+.chip small{font-weight:400;color:var(--mut);font-size:12px}
+.chip.on{border-color:var(--ok);color:var(--ok)}
+.chip.lock{opacity:.5}
+.chip .dot{width:12px;height:12px;border-radius:50%;flex:none;border:2px solid var(--line)}
+.chip .dot.r{background:#e60012;border-color:#e60012}.chip .dot.k{background:#111;border-color:#888}
+.chip.done{border-color:var(--ok)}
+.m3l.b{pointer-events:auto;cursor:pointer;min-height:30px;padding:5px 11px;font-size:13px;border:0;background:rgba(230,0,18,.92)}
+.m3g{display:flex;gap:6px;background:none;padding:0;pointer-events:none}
+#s-lab.fs .acts{margin:0;display:flex;gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;flex:none}
+#s-lab.fs .ag{display:none}#s-lab.fs .acts .grp,#s-lab.fs .acts .chips{display:contents}
 .hint{font-size:14px;color:var(--mut);margin:8px 2px 0}
 .out{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-size:15px;min-height:46px}
 .out.w{border-color:var(--bad);color:var(--bad)}
@@ -147,9 +162,10 @@ details.logbox summary{cursor:pointer;font-weight:600;min-height:44px;display:fl
   <div class="status"><span class="pill diem" id="st-diem"></span><span class="pill" id="st-dien"></span><span class="pill" id="st-tool"></span></div>
   <div class="bar"><b id="v-title"></b><span class="btns"><button class="mini hide" id="backMach">← Về máy</button><button class="mini" id="restart">↺ Làm lại</button><button class="mini fsb" id="fsBtn">⛶ Toàn màn hình</button></span></div>
   <div class="lab"><div class="stage" id="view"></div><div class="tools" id="tools"></div></div>
-  <p class="hint" id="hint"></p>
   <div class="out" id="out">Chưa có kết quả kiểm tra.</div>
   <div class="inst" id="inst"></div>
+  <div class="acts" id="acts"></div>
+  <p class="hint" id="hint"></p>
   <details class="qt" id="qt" open><summary id="qt-title">Quy trình kiểm tra</summary><div id="qt-body"></div></details>
   <button class="btn" id="toEnd">Ghi phiếu biên bản &amp; kết luận</button>
   <details class="logbox"><summary>Nhật ký thao tác (<span id="logn">0</span>)</summary><div class="log" id="log"></div></details>

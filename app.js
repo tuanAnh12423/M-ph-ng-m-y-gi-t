@@ -183,6 +183,7 @@ function render(){
  $('st-tool').textContent='Đang cầm: '+TOOLNAME[S.tool];
  $('tools').innerHTML=TOOLS.map(([id,n,svg])=>`<button class="tool${S.tool===id?' on':''}" data-t="${id}" aria-pressed="${S.tool===id}">${svg}<span>${n}</span></button>`).join('');
  $('inst').innerHTML=S.tool==='vom'?meterSvg():S.tool==='apluc'?gaugeSvg():'';
+ renderActs();
  updQT();
  $('logn').textContent=S.log.length;
  $('log').innerHTML=S.log.length?S.log.slice().reverse().map(x=>`<div class="${x.w?'w':''}">${esc(x.t)}</div>`).join(''):'<div class="mut">Chưa có thao tác nào.</div>';
@@ -192,7 +193,7 @@ function render(){
 function pinName(pin){
  const m=/^(.+)-([^-]+)$/.exec(pin),j=m&&(S.E.jack||[]).find(x=>x.id===m[1]);
  if(j){const d=j.day.find(x=>x[0]===m[2]);return j.id+' dây '+(d?d[1]:m[2])}
- return pin.replace(/^P(\d)$/,'chân $1');
+ return pin.replace(/^P(\d)$/,'Chân $1').replace(/^T(\d)$/,'Chân T$1');
 }
 function partOf(c){
  if(c.loai!=='do')return String(c.tai).split(':')[0];
@@ -220,6 +221,34 @@ function buildQT(){
   (g.buoc||[]).map(id=>`<details class="qs" data-q="${id}"><summary><span class="ic">○</span><span>${esc(ck(id).ten)}</span><span class="ch">${esc(ck(id).chuanTxt||'')}</span></summary><ul>${cachLam(id).map(x=>`<li>${x}</li>`).join('')}</ul></details>`).join('')).join('');
 }
 function updQT(){document.querySelectorAll('#qt-body .qs').forEach(el=>{const ok=!!S.valid[el.dataset.q];el.classList.toggle('ok',ok);el.querySelector('.ic').textContent=ok?'✓':'○'})}
+
+/* ===================== BẢNG NÚT THAO TÁC ===================== */
+const chip=(attrs,txt,cls='',sub='')=>`<button class="chip ${cls}" ${attrs}>${txt}${sub?` <small>${sub}</small>`:''}</button>`;
+function renderActs(){
+ const E=S.E,p=S.part;let h='';
+ if(!p){
+  h+=`<div class="grp"><div class="ag">Điện</div><div class="chips">`+
+   chip('data-act="phich"',S.dien?'Rút điện':'Cắm điện','', 'ổ điện')+
+   chip('data-act="nguon"','Nguồn',S.dien>=2?'on':(S.dien?'':'lock'),S.dien>=2?'đang bật':'')+
+   chip('data-act="start"','Start',S.dien===3?'on':(S.dien>=2?'':'lock'),S.dien===3?'đang chạy':'')+`</div></div>`;
+  if(S.nap)h+=`<div class="grp"><div class="ag">Mở máy</div><div class="chips">`+chip('data-act="nap"','Tháo nắp kỹ thuật','','tua vít')+`</div></div>`;
+  h+=`<div class="grp"><div class="ag">Lấy linh kiện ra kiểm tra</div><div class="chips">`+
+   E.linhKien.filter(k=>PARTS[k]).map(k=>chip(`data-part="${k}"`,esc(PARTS[k].ten.split(' (')[0]),S.nap&&!PARTS[k].ngoai?'lock':'')).join('')+`</div></div>`;
+ }else{
+  const sp=spotsOf(E,p).map(s=>{const id=spotCheck(p+':'+s);if(!id)return '';const c=ck(id);
+   const tool=c.loai==='apluc'?'Áp lực':TOOLNAME[c.dungCu||'tay'];
+   return chip(`data-spot="${p}:${s}"`,esc(c.ten),S.valid[id]?'done':'',tool)}).join('');
+  if(sp)h+=`<div class="grp"><div class="ag">Quan sát / kiểm tra</div><div class="chips">${sp}</div></div>`;
+  const pins=pinsOf(E,p);
+  if(pins.length)h+=`<div class="grp"><div class="ag">Điểm đặt que đo (cầm VOM, chọn thang đo, bấm 2 điểm)</div><div class="chips">`+
+   pins.map(pn=>{const i=S.probe.indexOf(pn);return chip(`data-pin="${pn}"`,`<span class="dot ${i===0?'r':i===1?'k':''}"></span>${esc(pinName(pn))}`,S.tool==='vom'?'':'lock')}).join('')+`</div></div>`;
+  h+=`<div class="grp"><div class="chips">`+chip('data-back="1"','← Lắp lại vào máy')+`</div></div>`;
+ }
+ $('acts').innerHTML=h;
+}
+$('acts').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;
+ if(b.dataset.back){$('backMach').click();return}
+ handle(b.dataset)};
 
 /* ===================== THAO TÁC ===================== */
 function onAct(a){
@@ -263,7 +292,8 @@ function measure(){
 function handle(d){
  if(d.pin)onPin(d.pin);
  else if(d.spot)onSpot(d.spot);
- else if(d.part){S.part=d.part;S.probe=[];S.mv='';log('Lấy ra kiểm tra: '+PARTS[d.part].ten);say('Đang kiểm tra '+PARTS[d.part].ten+'.')}
+ else if(d.part){if(S.nap&&!(PARTS[d.part]||{}).ngoai){say('Phải tháo nắp kỹ thuật trước mới lấy được '+PARTS[d.part].ten+'. Rút điện → cầm tua vít → bấm "Tháo nắp kỹ thuật".',1);render();return}
+  S.part=d.part;S.probe=[];S.mv='';log('Lấy ra kiểm tra: '+PARTS[d.part].ten);say('Đang kiểm tra '+PARTS[d.part].ten+'.')}
  else onAct(d.act);
  render();
 }
