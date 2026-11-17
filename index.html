@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mô phỏng mã lỗi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* VOICE: bàn thi tay nghề ở xưởng bảo hành — rõ, gọn, không trang trí thừa
+   IDEA: bàn kỹ thuật: máy của khách bên trái, khay dụng cụ bên phải, đồng hồ đo bên dưới
+   PICTURE: máy giặt SVG tháo được nắp, linh kiện lấy ra phóng to, VOM có núm xoay, đồng hồ áp lực
+   COLOUR and TYPE: trắng, mực đen, đỏ Toshiba; Be Vietnam Pro, Share Tech Mono cho số đo
+   LAYOUT: một cột cho điện thoại; thanh trạng thái trên cùng; nhật ký thu gọn */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#121314);--ink:light-dark(#141414,#ededed);--mut:light-dark(#5d6166,#a3a7ad);--line:light-dark(#e2e4e7,#2b2e31);--card:light-dark(#f5f6f7,#1b1d1f);--red:#e60012;--ok:light-dark(#127a3a,#4cc47a);--bad:light-dark(#c4000f,#ff6b6b);--warn:light-dark(#9a5b00,#f0b44c);--wall:light-dark(#e9e4dc,#2a2724);--bench:light-dark(#d9cbb4,#3a332a);--mach:light-dark(#fbfbfb,#d9dcdf)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Be Vietnam Pro",system-ui,sans-serif;overflow-x:clip}
+header{background:var(--red);color:#fff;padding:12px max(5vw,16px);display:flex;justify-content:space-between;align-items:center;gap:12px}
+header b{font-size:17px}header span{font-size:13px;white-space:nowrap}
+main{max-width:680px;margin:0 auto;padding:18px max(4vw,14px) 60px}
+h1{font-size:28px;line-height:1.12;margin:6px 0 12px;text-wrap:balance}
+h2{font-size:18px;margin:22px 0 8px}
+p{margin:0 0 12px}.mut{color:var(--mut);font-size:14px}.hide{display:none!important}
+label.f{display:block;font-weight:600;margin:14px 0 6px}
+input,select,textarea{width:100%;font:16px/1.5 "Be Vietnam Pro",sans-serif;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+textarea{min-height:88px}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid color-mix(in srgb,var(--red) 45%,transparent);outline-offset:2px}
+.btn{display:block;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:10px;background:var(--red);color:#fff;font:600 16px/48px "Be Vietnam Pro",sans-serif;cursor:pointer;text-align:center;text-decoration:none}
+.btn.sec{background:var(--card);color:var(--ink);border:1.5px solid var(--line);line-height:45px}
+.mini{min-height:40px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 14px "Be Vietnam Pro",sans-serif;cursor:pointer;white-space:nowrap}
+.box{background:var(--card);border-left:4px solid var(--red);padding:12px 14px;border-radius:0 10px 10px 0;margin:12px 0}
+.err{background:color-mix(in srgb,var(--bad) 12%,var(--bg));border:1.5px solid var(--bad);color:var(--bad);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:12px}
+.how{margin:0 0 14px;padding-left:22px}.how li{margin-bottom:4px}
+.codes{display:grid;gap:8px}
+.code{display:flex;gap:12px;align-items:center;padding:12px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer}
+.code input{width:20px;height:20px;flex:none}
+.code b{font:22px "Share Tech Mono",monospace;color:var(--red);min-width:52px}
+.code:has(input:checked){border-color:var(--red);background:color-mix(in srgb,var(--red) 6%,var(--bg))}
+.tag{display:inline-block;font-size:13px;padding:2px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);margin-right:6px}
+/* bàn kỹ thuật */
+.status{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pill{font-size:13px;font-weight:600;padding:4px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.pill.diem{background:var(--red);border-color:var(--red);color:#fff}
+.pill[data-s="0"]{color:var(--ok);border-color:var(--ok)}.pill[data-s="1"],.pill[data-s="2"]{color:var(--warn);border-color:var(--warn)}.pill[data-s="3"]{color:var(--bad);border-color:var(--bad)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.bar b{font-size:17px}.bar .btns{display:flex;gap:6px;margin-left:auto}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:8px}
+.stage{border-radius:14px;overflow:hidden;border:1.5px solid var(--line);display:flex;align-items:center}
+.tools{display:flex;flex-direction:column;gap:5px;background:#2b2f2a;border-radius:14px;padding:6px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:50px;padding:4px 2px;border-radius:10px;border:2px solid transparent;background:#3a3f39;color:#eee;font:600 12px/1.2 "Be Vietnam Pro",sans-serif;cursor:pointer}
+.tool svg{width:22px;height:22px}.tool.on{background:#ffd23f;color:#111;border-color:#fff}
+.sv{display:block;width:100%;height:auto;font-family:"Be Vietnam Pro",sans-serif}
+.sv .hs{cursor:pointer}.sv .glow{stroke:none}
+.sv .hs:hover .glow{stroke:#ffd23f;stroke-width:3}
+.sv .lb{font-size:12px;font-weight:600;fill:var(--ink)}.sv .lw{font-size:12px;font-weight:600;fill:#fff}
+.sv .lcdv{font:44px "Share Tech Mono",monospace;fill:#1d2418}.sv .lcdu{font:16px "Share Tech Mono",monospace;fill:#1d2418}.sv .lcds{font:13px "Share Tech Mono",monospace;fill:#1d2418}
+.sv .pl{font-size:12px;fill:#ddd}.sv .dl{font-size:12px;font-weight:700;pointer-events:none}
+@keyframes blink{50%{opacity:.25}}.sv .blink{animation:blink 1s steps(1) infinite}
+.pull{animation:pull .3s ease-out}@keyframes pull{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.pull,.sv .blink{animation:none}}
+.hint{font-size:14px;color:var(--mut);margin:8px 2px 0}
+.out{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-size:15px;min-height:46px}
+.out.w{border-color:var(--bad);color:var(--bad)}
+.inst{margin-top:10px;border-radius:18px;overflow:hidden}
+details.qt{margin-top:14px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px 6px}
+details.qt>summary{cursor:pointer;font-weight:700;min-height:46px;display:flex;align-items:center;font-size:16px}
+.qg{font-weight:600;font-size:14px;color:var(--red);margin:10px 0 4px}
+.qs{border-top:1px solid var(--line)}.qs>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:10px;font-size:15px;list-style:none}
+.qs>summary::-webkit-details-marker{display:none}
+.qs .ic{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700}
+.qs.ok .ic{background:var(--ok);border-color:var(--ok);color:#fff}
+.qs .ch{font-size:13px;color:var(--mut);margin-left:auto;white-space:nowrap}
+.qs ul{margin:0 0 10px 32px;padding:0;font-size:14px}.qs li{margin:2px 0}
+.qn{font-size:14px;color:var(--mut);margin:4px 0 8px}
+details.logbox{margin-top:18px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px}
+details.logbox summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.log{font-size:14px}.log div{padding:7px 0;border-top:1px solid var(--line)}.log .w{color:var(--bad)}
+/* phiếu + kết quả */
+.pf{width:100%;border-collapse:collapse;font-size:15px}.pf td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:middle}.pf td:last-child{width:42%}
+.pf input,.pf select{padding:8px 10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.opt input{width:20px;height:20px;margin-top:2px;flex:none}
+.opt:has(input:checked){border-color:var(--red)}
+.score{font-size:clamp(56px,18vw,88px);font-weight:700;line-height:1;color:var(--red)}
+.res div{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+.res b{white-space:nowrap}.good{color:var(--ok)}.bad{color:var(--bad)}
+@media(max-width:600px){.pf td{display:block;width:auto!important;border:0;padding:3px 0}.pf tr{display:block;border-bottom:1px solid var(--line);padding:6px 0}}
+</style>
+</head>
+<body>
+<header><b>TOSHIBA · Mô phỏng sửa chữa</b><span id="hd"></span></header>
+<main>
+
+<section id="s-start">
+  <h1>Thực hành sửa chữa theo mã lỗi</h1>
+  <p>Bạn nhận một ca bảo hành giả lập: kiểm tra máy, đo bằng dụng cụ, ghi phiếu biên bản và kết luận nguyên nhân.</p>
+  <ol class="how">
+    <li><b>Nhận ca</b> – mỗi lần vào là một nguyên nhân hỏng khác nhau.</li>
+    <li><b>Kiểm tra &amp; đo</b> – đo nguội khi rút điện; đo nóng khi cắm điện, bật Nguồn, bấm Start.</li>
+    <li><b>Ghi phiếu &amp; nộp</b> – kết quả tự gửi về trainer.</li>
+  </ol>
+  <div class="box">Điểm bắt đầu 100. Thao tác mất an toàn, đo sai thang, đặt que sai điểm hoặc kiểm tra thừa sẽ bị trừ điểm.</div>
+  <label class="f" for="nm">Họ tên KTV</label><input id="nm" autocomplete="name">
+  <label class="f" for="ma">Mã KTV / ASP</label><input id="ma">
+  <label class="f">Chọn mã lỗi</label><div class="codes" id="codes"></div>
+  <div class="err hide" id="dataErr"></div>
+  <button class="btn" id="go">Nhận ca sửa chữa</button>
+  <p class="mut" id="msg"></p>
+</section>
+
+<section id="s-case" class="hide">
+  <span class="tag" id="c-prod"></span><span class="tag" id="c-id"></span>
+  <h1 id="c-title"></h1>
+  <div class="box" id="c-intro"></div>
+  <p><b>Cách làm:</b> chọn dụng cụ ở cột bên phải rồi chạm vào máy. Rút điện để tháo nắp, kiểm tra jack và đo nguội (Ω, nF). Đo điện áp (đo nóng) thì cắm điện, bấm <b>Nguồn</b>, bấm <b>Start</b> trên bảng điều khiển máy.</p>
+  <button class="btn" id="toLab">Bắt đầu kiểm tra</button>
+</section>
+
+<section id="s-lab" class="hide">
+  <div class="status"><span class="pill diem" id="st-diem"></span><span class="pill" id="st-dien"></span><span class="pill" id="st-tool"></span></div>
+  <div class="bar"><b id="v-title"></b><span class="btns"><button class="mini hide" id="backMach">← Về máy</button><button class="mini" id="restart">↺ Làm lại</button></span></div>
+  <div class="lab"><div class="stage" id="view"></div><div class="tools" id="tools"></div></div>
+  <p class="hint" id="hint"></p>
+  <div class="out" id="out">Chưa có kết quả kiểm tra.</div>
+  <div class="inst" id="inst"></div>
+  <details class="qt" id="qt" open><summary id="qt-title">Quy trình kiểm tra</summary><div id="qt-body"></div></details>
+  <button class="btn" id="toEnd">Ghi phiếu biên bản &amp; kết luận</button>
+  <details class="logbox"><summary>Nhật ký thao tác (<span id="logn">0</span>)</summary><div class="log" id="log"></div></details>
+</section>
+
+<section id="s-end" class="hide">
+  <h1>Phiếu biên bản sửa chữa</h1>
+  <p class="mut" id="p-head"></p>
+  <h2>Kết quả kiểm tra / đo</h2>
+  <p class="mut">Ghi số liệu đã đo và tình trạng đã kiểm tra. Mục chưa làm thì để trống.</p>
+  <table class="pf" id="p-rows"></table>
+  <h2>Ghi chú của KTV</h2>
+  <textarea id="p-note" placeholder="Hiện tượng, nhận định, trao đổi với khách…"></textarea>
+  <h2>Nguyên nhân gây lỗi</h2><div id="causes"></div>
+  <h2>Cách xử lý</h2><div id="acts"></div>
+  <a class="btn" id="submit" href="#" target="_blank" rel="noopener">Nộp bài &amp; gửi kết quả</a>
+  <p class="mut" id="emsg"></p>
+  <button class="btn sec" id="back">Lưu phiếu, quay lại kiểm tra tiếp</button>
+</section>
+
+<section id="s-res" class="hide">
+  <p class="mut" id="r-who"></p>
+  <div class="score" id="r-score"></div>
+  <p class="mut">điểm / 100</p>
+  <p class="box hide" id="sentNote">Kết quả đã được gửi. Cửa sổ vừa mở hiện <b>"Đã ghi lại câu trả lời của bạn"</b> là xong.</p>
+  <div class="res" id="r-list"></div>
+  <h2>Đáp án &amp; ghi chú</h2><div class="log" id="r-notes"></div>
+  <h2>Đối chiếu phiếu biên bản</h2><div class="log" id="r-phieu"></div>
+  <a class="btn sec hide" id="resend" href="#" target="_blank" rel="noopener">Gửi lại (chỉ khi chưa thấy xác nhận)</a>
+  <button class="btn sec" id="copy">Sao chép kết quả (gửi Zalo)</button>
+  <button class="btn" id="again">Làm ca khác</button>
+  <p class="mut" id="cmsg"></p>
+</section>
+
+</main>
+<script src="parts.js"></script>
+<script src="ma-loi.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
