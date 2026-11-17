@@ -114,7 +114,7 @@ function machineSvg(){
      :`<rect x="10" y="266" width="30" height="18" rx="4" fill="#333"/><path d="M40 275 C70 282 100 280 120 270" stroke="#333" stroke-width="5" fill="none"/>`;
  s+=`</g>`;
  // thân máy + bảng điều khiển
- s+=`<rect x="92" y="40" width="240" height="246" rx="12" fill="var(--mach)" stroke="#aab1b8"/><rect x="92" y="40" width="240" height="36" rx="12" fill="#e9ecef" stroke="#aab1b8"/>`;
+ s+=`<rect x="92" y="40" width="240" height="246" rx="12" fill="var(--mach)" stroke="#aab1b8"/><rect x="92" y="40" width="240" height="36" rx="12" fill="#3a3f44" stroke="#111"/>`;
  const btn=(act,x,label,on)=>`<g class="hs" data-act="${act}"><rect class="glow" x="${x}" y="46" width="52" height="24" rx="12" fill="${on?'#2fa35a':'#c9ced3'}"/><text x="${x+26}" y="62" text-anchor="middle" style="font-size:12px;font-weight:700;fill:${on?'#fff':'#333'}">${label}</text></g>`;
  s+=btn('nguon',100,'Nguồn',d>=2)+btn('start',158,'Start',d===3);
  s+=`<rect x="250" y="47" width="70" height="22" rx="3" fill="#111"/>`;
@@ -122,9 +122,9 @@ function machineSvg(){
  if(d===3)s+=`<text x="285" y="63" text-anchor="middle" fill="#4cd07d" class="blink" style="font:13px 'Be Vietnam Pro',sans-serif;font-weight:700">Cấp nước</text>`;
  s+=`<text x="212" y="262" text-anchor="middle" style="font:700 18px 'Be Vietnam Pro',sans-serif;letter-spacing:3px" fill="#e60012">TOSHIBA</text>`;
  if(S.nap){
-  s+=`<g class="hs" data-act="nap"><rect class="glow" x="102" y="86" width="220" height="116" rx="6" fill="#dfe3e7" stroke="#b5bcc3"/>`;
+  s+=`<g class="hs" data-act="nap"><rect class="glow" x="102" y="86" width="220" height="116" rx="6" fill="#3b4045" stroke="#555"/>`;
   [[112,96],[312,96],[112,192],[312,192]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="4" fill="#8a929a"/>`);
-  s+=`<text x="212" y="140" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#333">Nắp kỹ thuật</text><text x="212" y="158" text-anchor="middle" style="font-size:12px;fill:#555">dùng tua vít để tháo</text></g>`;
+  s+=`<text x="212" y="140" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#eee">Nắp kỹ thuật</text><text x="212" y="158" text-anchor="middle" style="font-size:12px;fill:#bbb">dùng tua vít để tháo</text></g>`;
  }else{
   s+=`<rect x="102" y="86" width="220" height="116" rx="6" fill="#2a2f33"/>`;
   const pc=PARTS.pcb.slot;

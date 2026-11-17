@@ -18,7 +18,7 @@ window.May3D = (function(){
  /* ---------- vật liệu & hình cơ bản ---------- */
  const M = (color,o={})=>new T.MeshStandardMaterial(Object.assign({color,roughness:.5,metalness:0},o));
  const MAT = {
-  white: M(0xf6f7f8,{roughness:.32,metalness:.04}),
+  white: M(0x0b0c0e,{roughness:.32,metalness:.05,envMapIntensity:.25}),   // màu vỏ máy (đen)
   silver:M(0xc7ccd1,{roughness:.28,metalness:.55}),
   dark:  M(0x24292d,{roughness:.55}),
   panel: M(0x1d2226,{roughness:.25,metalness:.2}),
@@ -85,7 +85,7 @@ window.May3D = (function(){
   g.add(at(box(0.012,H,0.62,MAT.white),0.294,y,0));
   [[-0.29,0.3],[0.29,0.3],[-0.29,-0.3],[0.29,-0.3]].forEach(([x,z])=>g.add(at(cyl(0.012,0.012,H,MAT.white,16),x,y,z)));
   // logo mặt trước
-  const logo=canvasTex(512,96,(c,w,h)=>{c.clearRect(0,0,w,h);c.fillStyle='#e60012';c.font='bold 64px "Be Vietnam Pro",Arial,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('TOSHIBA',w/2,h/2+4)});
+  const logo=canvasTex(512,96,(c,w,h)=>{c.clearRect(0,0,w,h);c.fillStyle='#ff2b2b';c.font='bold 72px "Be Vietnam Pro",Arial,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('TOSHIBA',w/2,h/2+4)});
   const lg=new T.Mesh(new T.PlaneGeometry(0.22,0.042),new T.MeshBasicMaterial({map:logo,transparent:true}));at(lg,0,0.8,0.311);g.add(lg);
   // mặt trên có lỗ tròn
   const sh=new T.Shape();const w=0.3,d=0.31,r=0.03;
@@ -98,7 +98,7 @@ window.May3D = (function(){
   const holes=canvasTex(256,256,(c,W,Hh)=>{c.fillStyle='#b9c0c6';c.fillRect(0,0,W,Hh);c.fillStyle='#6f777e';for(let i=0;i<16;i++)for(let j=0;j<16;j++)if((i+j)%2)c.beginPath(),c.arc(i*16+8,j*16+8,2.6,0,7),c.fill()});
   holes.wrapS=holes.wrapT=T.RepeatWrapping;holes.repeat.set(6,2);drum.material=M(0xffffff,{map:holes,roughness:.3,metalness:.7,side:T.DoubleSide});
   const bot=mesh(new T.CircleGeometry(0.2,48),MAT.silver);bot.rotation.x=-Math.PI/2;at(bot,0,0.5,0.07);g.add(bot);
-  g.add(at(cyl(0.09,0.15,0.04,M(0xdfe3e7,{roughness:.4}),32),0,0.52,0.07));
+  g.add(at(cyl(0.09,0.15,0.04,M(0xb9c0c6,{roughness:.35,metalness:.4}),32),0,0.52,0.07));
   // nắp kính + khung
   const lid=new T.Group();at(lid,0,0.93,0.07);g.add(lid);
   [[0,0.21,0.5,0.04],[0,-0.21,0.5,0.04]].forEach(([x,z,w,d])=>lid.add(at(rbox(w,0.018,d,0.006,MAT.silver),x,0,z)));
@@ -121,7 +121,7 @@ window.May3D = (function(){
   O.btnN=btn(-0.22,cy,'nguon');O.btnS=btn(-0.05,cy,'start');
   // nắp kỹ thuật phía sau (có vít)
   const cov=new T.Group();g.add(cov);O.cover=cov;
-  cov.add(at(box(0.58,0.12,0.008,M(0xe3e6e9,{roughness:.45})),0,cy,-0.312));
+  cov.add(at(box(0.58,0.12,0.008,M(0x3b4045,{roughness:.4,metalness:.3})),0,cy,-0.312));
   [[-0.27,0.045],[0.27,0.045],[-0.27,-0.045],[0.27,-0.045]].forEach(([x,yy])=>{const s=cyl(0.007,0.007,0.004,MAT.chrome,12);s.rotation.x=Math.PI/2;cov.add(at(s,x,cy+yy,-0.317))});
   pickable(cov,{act:'nap'});
   // khoang linh kiện
