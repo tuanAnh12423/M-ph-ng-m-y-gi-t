@@ -2,7 +2,7 @@
 
 App thực hành cho kỹ thuật viên: quét QR → nhận ca bảo hành giả lập → kiểm tra, đo bằng dụng cụ (VOM, đồng hồ áp lực…) → ghi phiếu biên bản → kết luận. Kết quả tự gửi về Google Form của trainer.
 
-Link: https://tuananh12423.github.io/m-ph-ng-m-y-gi-t/  ·  Vào thẳng một mã lỗi: thêm `#E10` vào cuối link.
+Link: https://tuananh12423.github.io/M-ph-ng-m-y-gi-t/  ·  Vào thẳng một mã lỗi: thêm `#E10` vào cuối link.
 
 ## Các file
 | File | Nội dung |
