@@ -276,11 +276,24 @@ $('inst').onclick=e=>{const g=e.target.closest('[data-s]');if(!g)return;
  render()};
 $('tools').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.tool=b.dataset.t;S.probe=[];render();say('Đang cầm: '+TOOLNAME[S.tool]+'.')};
 $('backMach').onclick=()=>{S.part=null;S.probe=[];render();say('Đã lắp linh kiện vào máy.')};
+/* ---------- toàn màn hình ---------- */
+let FS=false;
+function setFs(on){
+ FS=on;document.body.classList.toggle('fs',on);$('s-lab').classList.toggle('fs',on);
+ [window.May3D&&May3D.el,window.LK3D&&LK3D.el].forEach(e=>e&&e.classList&&e.classList.toggle('fill',on));
+ $('fsBtn').textContent=on?'✕ Thoát':'⛶ Toàn màn hình';
+ try{if(on&&!document.fullscreenElement&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+     if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}
+ window.scrollTo(0,0);
+}
+$('fsBtn').onclick=()=>setFs(!FS);
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&FS)setFs(false)});
 $('restart').onclick=()=>{reset();log('↺ Làm lại ca (giữ nguyên điểm trừ và các bước đã làm)',1);render();say('Đã đưa máy về trạng thái ban đầu. Điểm trừ trước đó vẫn giữ nguyên.')};
 
 /* ===================== PHIẾU BIÊN BẢN ===================== */
 function savePhieu(){document.querySelectorAll('#p-rows [data-k]').forEach(el=>S.phieu.v[el.dataset.k]=el.value);S.phieu.ghiChu=$('p-note').value}
 $('toEnd').onclick=()=>{
+ if(FS)setFs(false);
  const E=S.E;
  if(!S.opts)S.opts={c:shuffle(uniq(E.nguyenNhan.map(n=>n.ten))),a:shuffle(uniq(E.nguyenNhan.map(n=>n.xuLy)))};
  $('p-head').textContent=`KTV: ${S.nm}${S.ma?' ('+S.ma+')':''} · Mã ca ${S.caseId} · ${S.code} – ${E.ten}`;

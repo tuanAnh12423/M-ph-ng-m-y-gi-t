@@ -65,6 +65,26 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .m3v{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap}
 .m3v button{min-height:32px;padding:0 10px;border-radius:99px;border:0;background:rgba(255,255,255,.88);color:#222;font:600 12px "Be Vietnam Pro",sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .m3t{position:absolute;right:8px;top:6px;font-size:12px;color:#6b6258;pointer-events:none}
+/* chế độ toàn màn hình */
+.m3d.fill{height:100%}
+body.fs{overflow:hidden}body.fs header{display:none}body.fs main{max-width:none;padding:0}
+#s-lab.fs{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;gap:6px;padding:6px}
+#s-lab.fs .status,#s-lab.fs .bar{margin:0}
+#s-lab.fs .bar b{font-size:15px}
+#s-lab.fs .lab{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 64px}
+#s-lab.fs .stage{height:100%;align-items:stretch}
+#s-lab.fs .stage>svg{width:100%;height:100%}
+#s-lab.fs .tools{overflow-y:auto}
+#s-lab.fs .out{margin:0;min-height:0;padding:6px 10px;font-size:14px;line-height:1.35}
+#s-lab.fs .inst{margin:0}#s-lab.fs .inst:empty{display:none}
+#s-lab.fs .inst svg{height:min(22vh,170px);width:auto;max-width:100%;margin:0 auto}
+#s-lab.fs .hint,#s-lab.fs #toEnd,#s-lab.fs details,#s-lab.fs #restart{display:none}
+.fsb{background:var(--red);color:#fff;border-color:var(--red)}
+@media(orientation:landscape){
+ #s-lab.fs{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,34%);grid-template-rows:auto auto auto 1fr;grid-template-areas:"lab st" "lab bar" "lab out" "lab inst"}
+ #s-lab.fs .lab{grid-area:lab;height:100%}#s-lab.fs .status{grid-area:st}#s-lab.fs .bar{grid-area:bar}#s-lab.fs .out{grid-area:out}#s-lab.fs .inst{grid-area:inst;align-self:start}
+ #s-lab.fs .inst svg{height:auto;width:100%;max-height:none}
+}
 .hint{font-size:14px;color:var(--mut);margin:8px 2px 0}
 .out{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-size:15px;min-height:46px}
 .out.w{border-color:var(--bad);color:var(--bad)}
@@ -125,7 +145,7 @@ details.logbox summary{cursor:pointer;font-weight:600;min-height:44px;display:fl
 
 <section id="s-lab" class="hide">
   <div class="status"><span class="pill diem" id="st-diem"></span><span class="pill" id="st-dien"></span><span class="pill" id="st-tool"></span></div>
-  <div class="bar"><b id="v-title"></b><span class="btns"><button class="mini hide" id="backMach">← Về máy</button><button class="mini" id="restart">↺ Làm lại</button></span></div>
+  <div class="bar"><b id="v-title"></b><span class="btns"><button class="mini hide" id="backMach">← Về máy</button><button class="mini" id="restart">↺ Làm lại</button><button class="mini fsb" id="fsBtn">⛶ Toàn màn hình</button></span></div>
   <div class="lab"><div class="stage" id="view"></div><div class="tools" id="tools"></div></div>
   <p class="hint" id="hint"></p>
   <div class="out" id="out">Chưa có kết quả kiểm tra.</div>

@@ -225,7 +225,7 @@ window.May3D = (function(){
  }
 
  /* ---------- vòng lặp ---------- */
- function resize(){const w=el.clientWidth||360,h=Math.round(w/1.15);renderer.setSize(w,h,false);renderer.domElement.style.height=h+'px';cam.aspect=w/h;cam.updateProjectionMatrix()}
+ function resize(){const w=el.clientWidth||360,fill=el.classList.contains('fill')&&el.clientHeight>80,h=fill?el.clientHeight:Math.round(w/1.15);renderer.setSize(w,h,false);renderer.domElement.style.height=h+'px';cam.aspect=w/h;const k=Math.max(1,1.15/cam.aspect);cam.fov=Math.min(75,2*Math.atan(Math.tan(36*Math.PI/360)*k)*180/Math.PI);cam.updateProjectionMatrix()} // màn hình dọc: mở rộng góc nhìn để giữ đủ bề ngang
  const tmp=new T.Vector3();
  function loop(){
   if(!el.isConnected){running=false;return}

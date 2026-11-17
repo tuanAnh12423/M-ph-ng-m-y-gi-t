@@ -58,7 +58,7 @@ window.LK3D = (function(){
   const t=tex(512,512,(g,w,h)=>{g.fillStyle='#'+color.toString(16).padStart(6,'0');g.fillRect(0,0,w,h);for(let i=0;i<70;i++){g.strokeStyle=`rgba(60,40,20,${Math.random()*.18})`;g.lineWidth=1+Math.random()*2;g.beginPath();const y=Math.random()*h;g.moveTo(0,y);g.bezierCurveTo(w/3,y+Math.random()*20-10,2*w/3,y+Math.random()*20-10,w,y+Math.random()*10-5);g.stroke()}});
   const b=new T.Mesh(new T.PlaneGeometry(80,80),M(0xffffff,{map:t,roughness:.75}));b.rotation.x=-Math.PI/2;b.receiveShadow=true;root.add(b);
  }
- function resize(){const w=el.clientWidth||360,h=Math.round(w/1.15);renderer.setSize(w,h,false);renderer.domElement.style.height=h+'px';cam.aspect=w/h;cam.updateProjectionMatrix()}
+ function resize(){const w=el.clientWidth||360,fill=el.classList.contains('fill')&&el.clientHeight>80,h=fill?el.clientHeight:Math.round(w/1.15);renderer.setSize(w,h,false);renderer.domElement.style.height=h+'px';cam.aspect=w/h;const k=Math.max(1,1.15/cam.aspect);cam.fov=Math.min(75,2*Math.atan(Math.tan(35*Math.PI/360)*k)*180/Math.PI);cam.updateProjectionMatrix()} // màn hình dọc: mở rộng góc nhìn để giữ đủ bề ngang
  function visible(o){for(;o;o=o.parent)if(!o.visible)return false;return true}
  function pick(e){
   if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>8)return;
