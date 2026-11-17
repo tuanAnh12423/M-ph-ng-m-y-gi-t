@@ -151,7 +151,7 @@ window.May3D = (function(){
   g.add(at(rbox(0.012,0.09,0.09,0.004,MAT.chrome),-0.633,1.18,-0.22));                       // đế gắn tường
   const pipe=cyl(0.014,0.014,0.07,MAT.chrome,16);pipe.rotation.z=Math.PI/2;g.add(at(pipe,-0.6,1.18,-0.22));
   g.add(at(cyl(0.024,0.024,0.05,MAT.chrome,24),-0.56,1.18,-0.22));                             // thân van
-  const lever=box(0.02,0.012,0.09,MAT.red);at(lever,-0.56,1.213,-0.2);g.add(lever);
+  const lever=box(0.02,0.012,0.09,MAT.red);at(lever,-0.56,1.213,-0.22);g.add(lever);O.lever=lever;
   g.add(at(cyl(0.014,0.014,0.05,MAT.chrome,16),-0.56,1.14,-0.22));                             // đầu ra
   const hit=new T.Mesh(new T.BoxGeometry(0.16,0.16,0.16),new T.MeshBasicMaterial({visible:false}));at(hit,-0.57,1.17,-0.22);g.add(hit);
   pickable(g,{part:'voi'});O.faucet=g;
@@ -249,6 +249,7 @@ window.May3D = (function(){
   const on=(m,c)=>{m.material.emissive.setHex(c);m.material.emissiveIntensity=c?1.2:0};
   on(O.btnN,S.dien>=2?0x2fa35a:0);on(O.btnS,S.dien===3?0x2fa35a:0);
   O.btnMat[0].material.color.setHex(S.dien>=2?0x3cc46e:0xc9ced3);O.btnMat[1].material.color.setHex(S.dien===3?0x3cc46e:0xc9ced3);
+  O.lever.rotation.y=S.v.hong.includes('voi')?0.35:Math.PI/2;   // song song ống = mở, gần vuông góc = gần khóa
   O.cover.visible=S.nap;O.lNap.hide=!S.nap;
   O.inside.visible=!S.nap;O.partLabels.forEach(L=>L.hide=S.nap);
   if(last.nap&&!S.nap)view('sau');

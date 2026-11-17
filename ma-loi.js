@@ -46,7 +46,7 @@ MA_LOI.E10 = {
   apluc :{loai:'apluc', ten:'Áp lực nước đầu vào', tai:'voi:dau-noi', dv:'MPa', tot:[0.15,0.45,2], hong:'0.01', chuan:[0.03,0.8], chuanTxt:'0,03–0,8 MPa'}, // 0,03–0,8 MPa theo HDSD máy giặt cửa trên Toshiba
   voi   :{loai:'xem', ten:'Vòi nước, ống cấp', tai:'voi:tay-van', tot:'Vòi mở, nước chảy mạnh, ống cấp không gập, không rò rỉ.', hong:'Vòi nước đang khóa gần hết, nước chảy rất yếu.'},
   loc   :{loai:'xem', ten:'Lưới lọc van cấp', tai:'van:luoi-loc', dungCu:'cole', tot:'Lưới lọc sạch.', hong:'Lưới lọc bám đầy cặn, gần như bị bịt kín.'},
-  cn9   :{loai:'xem', ten:'Jack CN9 (van ↔ PCB)', tai:'pcb:CN9', nguoi:1, tot:'Jack CN9 cắm chắc, dây không đứt.', hong:'Jack CN9 bị lỏng, chân tiếp xúc kém.'},
+  cn9   :{loai:'xem', ten:'Jack CN9 (van ↔ PCB)', tai:'pcb:CN9', nguoi:1, tot:'Jack CN9 cắm chắc, dây không đứt.', hong:'Jack CN9 bị lỏng, dây cam bị đứt sát chân jack.'},
   van_v :{loai:'do', ten:'Điện áp cấp cho van (CN9)', tai:[['CN9-W','CN9-O']], thang:'VAC', dv:'V', can:'chay', tot:[218,229,1], hong:'0.0', chuanTxt:'220 VAC'},
   van_r :{loai:'do', ten:'Điện trở cuộn dây van', tai:[['T1','T2']], thang:'Ω', dv:'kΩ', tot:[10.5,14.5,2], hong:'OL', chuanTxt:'10–15 kΩ'},
   cn2   :{loai:'xem', ten:'Jack CN2 (phao ↔ PCB)', tai:'pcb:CN2', nguoi:1, tot:'Jack CN2 cắm chắc, dây không đứt.', hong:'Jack CN2 bị tuột một nửa.'},

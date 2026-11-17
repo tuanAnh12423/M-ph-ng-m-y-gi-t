@@ -159,8 +159,9 @@ function gaugeSvg(){
  return s+`</svg>`;
 }
 const has3D=()=>!!(window.May3D&&May3D.ok());
+const has3DPart=p=>!!(window.LK3D&&LK3D.ok()&&LK3D.has(p));
 function hint(){
- if(S.part)return PARTS[S.part].goiY;
+ if(S.part)return (has3DPart(S.part)?'Kéo để xoay linh kiện. ':'')+PARTS[S.part].goiY;
  if(has3D()){
   if(S.nap)return 'Kéo để xoay máy. Nắp kỹ thuật ở phía sau hộp điều khiển. '+(S.dien?'Rút điện (chạm ổ điện trên tường), ':'')+'cầm tua vít, bấm "Mặt sau" rồi chạm nắp để tháo.';
   return 'Chạm van, PCB hoặc phao để lấy ra kiểm tra. Đo nguội: rút điện. Đo nóng: cắm điện → Nguồn → Start (bấm "Mặt trước" để thấy nút).';
@@ -171,6 +172,7 @@ function hint(){
 function render(){
  const p=S.part;
  if(!p&&has3D()){if($('view').firstChild!==May3D.el){$('view').innerHTML='';$('view').appendChild(May3D.el)}May3D.update(S)}
+ else if(p&&has3DPart(p)){if($('view').firstChild!==LK3D.el){$('view').innerHTML='';$('view').appendChild(LK3D.el)}LK3D.show(S,p)}
  else $('view').innerHTML=p?zoomSvg(p):machineSvg();
  $('view').style.background=(!p||p==='voi')?'var(--wall)':'var(--bench)';
  $('v-title').textContent=p?PARTS[p].ten:'Máy của khách';
@@ -267,6 +269,7 @@ function handle(d){
 }
 $('view').onclick=e=>{if(e.target.closest('.m3d'))return;const g=e.target.closest('[data-pin],[data-spot],[data-part],[data-act]');if(g)handle(g.dataset)};
 if(has3D())May3D.onPick=d=>{if(S)handle(d)};
+if(window.LK3D&&LK3D.ok())LK3D.onPick=d=>{if(S)handle(d)};
 $('inst').onclick=e=>{const g=e.target.closest('[data-s]');if(!g)return;
  S.thang=g.dataset.s==='OFF'?null:g.dataset.s;S.mv='';S.mu='';
  if(S.probe.length===2&&S.thang){S.quiet=1;measure();S.quiet=0}
