@@ -59,6 +59,12 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 @keyframes blink{50%{opacity:.25}}.sv .blink{animation:blink 1s steps(1) infinite}
 .pull{animation:pull .3s ease-out}@keyframes pull{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media(prefers-reduced-motion:reduce){.pull,.sv .blink{animation:none}}
+.m3d{position:relative;width:100%;touch-action:none;user-select:none;-webkit-user-select:none}
+.m3d canvas{display:block;width:100%}
+.m3l{position:absolute;left:0;top:0;font:600 12px "Be Vietnam Pro",sans-serif;background:rgba(20,22,24,.78);color:#fff;padding:2px 8px;border-radius:99px;pointer-events:none;white-space:nowrap}
+.m3v{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap}
+.m3v button{min-height:32px;padding:0 10px;border-radius:99px;border:0;background:rgba(255,255,255,.88);color:#222;font:600 12px "Be Vietnam Pro",sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.m3t{position:absolute;right:8px;top:6px;font-size:12px;color:#6b6258;pointer-events:none}
 .hint{font-size:14px;color:var(--mut);margin:8px 2px 0}
 .out{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1.5px solid var(--line);font-size:15px;min-height:46px}
 .out.w{border-color:var(--bad);color:var(--bad)}
@@ -159,6 +165,11 @@ details.logbox summary{cursor:pointer;font-weight:600;min-height:44px;display:fl
 </section>
 
 </main>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/RoomEnvironment.js"></script>
+<script src="lib/RoundedBoxGeometry.js"></script>
+<script src="may3d.js"></script>
 <script src="parts.js"></script>
 <script src="ma-loi.js"></script>
 <script src="app.js"></script>

@@ -158,14 +158,20 @@ function gaugeSvg(){
  s+=`<text x="210" y="62" class="pl" style="font-size:14px">Đồng hồ áp lực nước</text><text x="210" y="106" style="font:34px 'Share Tech Mono',monospace;fill:#ffd23f">${S.gv==null?'--':esc(S.gv)}</text><text x="210" y="128" class="pl">MPa · vùng xanh ${String(lo).replace('.',',')}–${String(hi).replace('.',',')}</text>`;
  return s+`</svg>`;
 }
+const has3D=()=>!!(window.May3D&&May3D.ok());
 function hint(){
  if(S.part)return PARTS[S.part].goiY;
+ if(has3D()){
+  if(S.nap)return 'Kéo để xoay máy. Nắp kỹ thuật ở phía sau hộp điều khiển. '+(S.dien?'Rút điện (chạm ổ điện trên tường), ':'')+'cầm tua vít, bấm "Mặt sau" rồi chạm nắp để tháo.';
+  return 'Chạm van, PCB hoặc phao để lấy ra kiểm tra. Đo nguội: rút điện. Đo nóng: cắm điện → Nguồn → Start (bấm "Mặt trước" để thấy nút).';
+ }
  if(S.nap)return S.dien?'Muốn tháo nắp: rút điện ở ổ điện, cầm tua vít, chạm nắp kỹ thuật.':'Cầm tua vít rồi chạm nắp kỹ thuật để tháo.';
  return 'Chạm linh kiện để lấy ra kiểm tra. Đo nguội: rút điện. Đo nóng: cắm điện → Nguồn → Start.';
 }
 function render(){
  const p=S.part;
- $('view').innerHTML=p?zoomSvg(p):machineSvg();
+ if(!p&&has3D()){if($('view').firstChild!==May3D.el){$('view').innerHTML='';$('view').appendChild(May3D.el)}May3D.update(S)}
+ else $('view').innerHTML=p?zoomSvg(p):machineSvg();
  $('view').style.background=(!p||p==='voi')?'var(--wall)':'var(--bench)';
  $('v-title').textContent=p?PARTS[p].ten:'Máy của khách';
  $('backMach').classList.toggle('hide',!p);
@@ -252,14 +258,15 @@ function measure(){
  S.valid[id]=1;S.mv=isBad(id)?c.hong:S.vals[id];S.mu=c.dv;S.got[id]=S.mv;
  const t=c.ten+': '+S.mv+' '+c.dv;log(t);say(t);
 }
-$('view').onclick=e=>{
- const g=e.target.closest('[data-pin],[data-spot],[data-part],[data-act]');if(!g)return;const d=g.dataset;
+function handle(d){
  if(d.pin)onPin(d.pin);
  else if(d.spot)onSpot(d.spot);
  else if(d.part){S.part=d.part;S.probe=[];S.mv='';log('Lấy ra kiểm tra: '+PARTS[d.part].ten);say('Đang kiểm tra '+PARTS[d.part].ten+'.')}
  else onAct(d.act);
  render();
-};
+}
+$('view').onclick=e=>{if(e.target.closest('.m3d'))return;const g=e.target.closest('[data-pin],[data-spot],[data-part],[data-act]');if(g)handle(g.dataset)};
+if(has3D())May3D.onPick=d=>{if(S)handle(d)};
 $('inst').onclick=e=>{const g=e.target.closest('[data-s]');if(!g)return;
  S.thang=g.dataset.s==='OFF'?null:g.dataset.s;S.mv='';S.mu='';
  if(S.probe.length===2&&S.thang){S.quiet=1;measure();S.quiet=0}
