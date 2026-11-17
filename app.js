@@ -74,7 +74,7 @@ $('go').onclick = ()=>{
  S={nm,ma,code,E,v,vals,caseId:code+'-'+(1000+Math.floor(Math.random()*9000)),intro:rnd(E.tinhHuong),t0:Date.now(),
     done:{},valid:{},got:{},pen:[],log:[],phieu:{v:{},ghiChu:''},opts:null};
  reset();
- $('c-prod').textContent=E.sanPham;$('c-id').textContent='Mã ca '+S.caseId;$('c-title').textContent=code+' – '+E.ten;$('c-intro').textContent=S.intro;
+ $('c-prod').textContent=E.sanPham;$('c-id').textContent='Mã ca '+S.caseId;$('c-title').textContent=code+' – '+E.ten;$('c-intro').textContent=S.intro;$('c-mota').textContent=E.moTa||'';$('c-mota').classList.toggle('hide',!E.moTa);
  $('hd').textContent=S.caseId; show('s-case');
 };
 $('toLab').onclick = ()=>{buildQT();render();show('s-lab')};
@@ -83,6 +83,8 @@ function reset(){Object.assign(S,{dien:2,nap:true,part:null,tool:'tay',thang:nul
 /* ===================== TRẠNG THÁI & ĐIỂM ===================== */
 const ck = id=>S.E.kiemTra[id];
 const isBad = id=>S.v.hong.includes(id);
+const badVal = id=>(S.v.giaTri&&S.v.giaTri[id]!=null)?S.v.giaTri[id]:ck(id).hong;   // giá trị đo khi hỏng
+const badTxt = id=>(S.v.hienTuong&&S.v.hienTuong[id])||ck(id).hong;                  // mô tả khi hỏng
 const spotCheck = spot=>Object.keys(S.E.kiemTra).find(id=>ck(id).loai!=='do'&&ck(id).tai===spot);
 const log = (t,w)=>S.log.push({t,w});
 function say(t,w){$('out').textContent=t;$('out').classList.toggle('w',!!w)}
@@ -99,7 +101,8 @@ function H(part){return{
  pin:(id,x,y)=>{const i=S.probe.indexOf(id),r=i===0?'#e60012':i===1?'#111':'';return `<g class="hs" data-pin="${id}"><circle cx="${x}" cy="${y}" r="18" fill="transparent"/><circle cx="${x}" cy="${y}" r="9" fill="#d4a72c"${r?` stroke="${r}" stroke-width="5"`:''}/></g>`},
  spot:(id,inner)=>`<g class="hs" data-spot="${part}:${id}">${inner}</g>`,
  seen:id=>{const k=spotCheck(part+':'+id);return !!(k&&S.seen[k])},
- bad:id=>{const k=spotCheck(part+':'+id);return !!(k&&S.seen[k]&&isBad(k))}
+ bad:id=>{const k=spotCheck(part+':'+id);return !!(k&&S.seen[k]&&isBad(k))},
+ badNow:id=>{const k=spotCheck(part+':'+id);return !!(k&&isBad(k))}   // dấu hiệu nhìn thấy ngay
 }}
 function machineSvg(){
  const d=S.dien,E=S.E,L=E.linhKien;
@@ -260,12 +263,12 @@ function onAct(a){
 function onSpot(spot){
  const id=spotCheck(spot);if(!id){say('Chưa có bước kiểm tra nào ở điểm này.');return}
  const c=ck(id);
- if(c.loai==='apluc'){if(!needTool('apluc'))return;dem(id);S.valid[id]=S.seen[id]=1;S.gv=isBad(id)?c.hong:S.vals[id];S.got[id]=S.gv;const t=c.ten+': '+S.gv+' '+c.dv;log(t);say(t);return}
+ if(c.loai==='apluc'){if(!needTool('apluc'))return;dem(id);S.valid[id]=S.seen[id]=1;S.gv=isBad(id)?badVal(id):S.vals[id];S.got[id]=S.gv;const t=c.ten+': '+S.gv+' '+c.dv;log(t);say(t);return}
  if(!needTool(c.dungCu||'tay'))return;
  dem(id);const unsafe=c.nguoi&&S.dien>0;
  if(unsafe)tru('Kiểm tra '+c.ten+' khi máy còn điện',TRU.antoan);
  S.valid[id]=S.seen[id]=1;S.got[id]=isBad(id)?'Bất thường':'Tốt';
- const t=c.ten+': '+(isBad(id)?c.hong:c.tot);log(t);if(!unsafe)say(t);
+ const t=c.ten+': '+(isBad(id)?badTxt(id):c.tot);log(t);if(!unsafe)say(t);
 }
 function onPin(pin){
  if(!needTool('vom'))return;
@@ -286,7 +289,7 @@ function measure(){
  const c=ck(id);dem(id);
  if(isV(sc)){const need=c.can==='chay'?3:2;
   if(S.dien<need){S.mv=sc==='VAC'?'0.0':'0.00';S.mu='V';const t=c.ten+': '+S.mv+' V — '+(need===3?'máy chưa chạy (cần bấm Start)':'máy chưa bật nguồn')+', số đo không có giá trị';log(t,1);say(t,1);return}}
- S.valid[id]=1;S.mv=isBad(id)?c.hong:S.vals[id];S.mu=c.dv;S.got[id]=S.mv;
+ S.valid[id]=1;S.mv=isBad(id)?badVal(id):S.vals[id];S.mu=c.dv;S.got[id]=S.mv;
  const t=c.ten+': '+S.mv+' '+c.dv;log(t);say(t);
 }
 function handle(d){

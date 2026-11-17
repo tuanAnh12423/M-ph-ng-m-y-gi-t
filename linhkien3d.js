@@ -106,7 +106,7 @@ window.LK3D = (function(){
   g.rotation.z=color===0xe60012?0.35:-0.35;g.traverse(x=>x.userData.thru=1);return g;
  }
  const hitTube=(pts,r)=>{const m=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts.map(p=>new T.Vector3(...p))),20,r,6,false),new T.MeshBasicMaterial({visible:false}));return m};
- function frame(pos,target){cam.position.set(...pos);ctrl.target.set(...target);ctrl.update()}
+ function frame(pos,target){cam.position.set(...pos);ctrl.target.set(...target);const d=cam.position.distanceTo(ctrl.target);ctrl.minDistance=d*0.35;ctrl.maxDistance=d*2.5;ctrl.update()}
 
  /* =================== VAN CẤP =================== */
  function van(){
@@ -234,7 +234,7 @@ window.LK3D = (function(){
   root.add(at(sph(1.6,MT.chrome),0,6,1));
   const out=cyl(0.8,0.8,3,MT.chrome,20);at(out,0,4,1);root.add(out);
   // tay vặn: song song với ống = mở; vuông góc = khóa
-  const closed=bad('voi:tay-van'),lev=new T.Group();at(lev,0,7.6,1);
+  const closed=(S.v.dau||[]).includes('voi-khoa'),weak=bad('voi:tay-van'),lev=new T.Group();at(lev,0,7.6,1);
   lev.add(at(cyl(0.4,0.4,1.2,MT.chrome,12),0,0,0));
   const arm=rbox(1.2,0.6,6,0.25,MT.red);at(arm,0,0.5,2.6);lev.add(arm);
   const lh=new T.Mesh(new T.BoxGeometry(3,3,8),new T.MeshBasicMaterial({visible:false}));at(lh,0,0.5,2.8);lev.add(lh);
@@ -261,14 +261,58 @@ window.LK3D = (function(){
   if(checked&&!gauge){ // đã tháo ống, mở vòi xả thử vào xô
    const bucket=mesh(new T.CylinderGeometry(5,4,8,32,1,true),M(0x2b6cb0,{roughness:.5,side:T.DoubleSide}));at(bucket,0,-12,2);root.add(bucket);
    const wm=new T.MeshPhysicalMaterial({color:0x7ec3ff,roughness:.05,transparent:true,opacity:.7,depthWrite:false});
-   if(!closed){const s=cyl(0.55,0.75,9,wm,16);at(s,0,-3.4,1);s.userData.thru=1;root.add(s);label('Nước chảy mạnh',[3.5,-2,1])}
+   if(!weak){const s=cyl(0.55,0.75,9,wm,16);at(s,0,-3.4,1);s.userData.thru=1;root.add(s);label('Nước chảy mạnh',[3.5,-2,1])}
    else{const drops=[];for(let i=0;i<4;i++){const d=sph(0.22,wm);d.userData.thru=1;root.add(d);drops.push(d)}
     root.userData.anim=t=>drops.forEach((d,i)=>{const k=((t*0.9+i/4)%1);at(d,0,1-k*9,1)});label('Nước chảy rất yếu',[3.5,-2,1])}
   }
   frame([14,3,24],[0,1,0]);
  }
 
- const B={van,pcb,phao,voi};
+ /* =================== ỐNG CẤP NƯỚC =================== */
+ function ongcap(){
+  bench(0xc9b99c);
+  const wall=new T.Mesh(new T.PlaneGeometry(200,80),M(0xe4ddd2,{roughness:.9}));at(wall,0,40,-30);root.add(wall);
+  const kink=bad('ongcap:gap'),hm=M(0x9aa3ab,{roughness:.45,metalness:.35});
+  const braid=tex(256,64,(g,w,h)=>{g.fillStyle='#a7aeb4';g.fillRect(0,0,w,h);g.strokeStyle='#7d858c';g.lineWidth=2;for(let i=-h;i<w;i+=8){g.beginPath();g.moveTo(i,0);g.lineTo(i+h,h);g.stroke();g.beginPath();g.moveTo(i+h,0);g.lineTo(i,h);g.stroke()}});
+  braid.wrapS=braid.wrapT=T.RepeatWrapping;braid.repeat.set(30,1);hm.map=braid;
+  const ok=[[-60,1.2,-20],[-30,1.2,-12],[0,1.2,0],[30,1.2,6],[60,1.2,4]];
+  const bd=[[-60,1.2,-20],[-30,1.2,-12],[-6,1.2,-2],[3,1.2,2],[-2,1.2,8],[8,1.2,7],[30,1.2,6],[60,1.2,4]];
+  const P=kink?bd:ok,g=new T.Group();
+  g.add(tube(P,1.1,hm,kink?120:60));g.add(hitTube(P,4));
+  if(kink){const fl=sph(1.6,hm);fl.scale.set(1,0.45,1);at(fl,1,1.0,4.5);g.add(fl);label('Chỗ ống bị gập',[2,6,4])}
+  pickable(g,{spot:'ongcap:gap'});root.add(g);
+  label('Ống cấp nước (từ vòi → van cấp)',[-40,6,-16],{spot:'ongcap:gap'});
+  root.add(at(rbox(10,6,6,1,M(0x0d0f11,{roughness:.4})),66,3,4));            // đầu nối vào máy
+  frame([10,62,58],[0,0,0]);
+ }
+ /* =================== ỐNG XẢ =================== */
+ function ongxa(){
+  bench(0xc9b99c);
+  const wall=new T.Mesh(new T.PlaneGeometry(240,160),M(0xe4ddd2,{roughness:.9}));at(wall,0,80,-40);root.add(wall);
+  const mc=box(60,92,4,M(0x0d0f11,{roughness:.4,envMapIntensity:.25}));at(mc,42,46,-12);root.add(mc);    // mặt sau máy
+  root.add(at(cyl(14,14,0.6,M(0x8f969c,{metalness:.6,roughness:.4}),32),-40,0.3,10));
+  root.add(at(cyl(9,9,0.7,M(0x15181a),32),-40,0.4,10));                                                 // miệng cống
+  const low=bad('ongxa:vi-tri'),dm=M(0x5b6167,{roughness:.7});
+  const ok=[[14,6,-8],[7,40,-10],[0,80,-14],[-10,86,-18],[-28,70,-14],[-38,30,4],[-40,4,10]];
+  const bd=[[14,6,-8],[5,2,2],[-12,1.6,8],[-32,1.5,10],[-40,-6,10],[-40,-20,10]];
+  const P=low?bd:ok,g=new T.Group();
+  g.add(tube(P,2.2,dm,90));g.add(hitTube(P,7));
+  const curve=new T.CatmullRomCurve3(P.map(p=>new T.Vector3(...p)));
+  for(let i=1;i<40;i++){const t=i/40,p=curve.getPointAt(t),tg=curve.getTangentAt(t);if(p.y<0.5)continue;const r=new T.Mesh(new T.TorusGeometry(2.25,0.35,6,20),dm);r.position.copy(p);r.lookAt(p.clone().add(tg));g.add(r)}
+  if(!low)g.add(at(box(6,4,6,M(0x333333)),-2,88,-18));                                                 // móc treo
+  pickable(g,{spot:'ongxa:vi-tri'});root.add(g);
+  label(low?'Ống xả nằm sàn, cắm sâu xuống cống':'Ống xả treo trên móc',low?[-10,12,10]:[-2,100,-18],{spot:'ongxa:vi-tri'});
+  label('Cống thoát sàn',[-40,8,24]);
+  if(low&&S.dien===3){
+   const wm=new T.MeshBasicMaterial({color:0x5fb4ff,transparent:true,opacity:.7});const rings=[];
+   for(let i=0;i<3;i++){const r=new T.Mesh(new T.RingGeometry(1,1.8,24),wm.clone());r.rotation.x=-Math.PI/2;at(r,-40,0.8,10);r.userData.thru=1;root.add(r);rings.push(r)}
+   root.userData.anim=t=>rings.forEach((r,i)=>{const k=(t*0.8+i/3)%1;r.scale.setScalar(1+k*4);r.material.opacity=0.8*(1-k)});
+   label('Nước đang chảy ra cống trong lúc máy cấp',[-40,22,10]);
+  }
+  frame([60,80,190],[-5,45,0]);
+ }
+
+ const B={van,pcb,phao,voi,ongcap,ongxa};
  function show(state,part){
   S=state;if(!built)build();
   root.clear();delete root.userData.anim;clearLabels();for(const k in PIN)delete PIN[k];

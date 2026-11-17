@@ -32,6 +32,29 @@ window.PARTS = {
   }
  },
 
+ ongcap:{
+  ten:'Ống cấp nước', ngoai:true, spots:['gap'], pins:[],
+  goiY:'Cầm tay rồi chạm ống cấp để kiểm tra ống có bị gập, xoắn không.',
+  zoom(h){
+   const k=h.badNow('gap'),d=k?'M20 60 C120 60,150 70,170 120 L150 150 L200 140 C230 190,280 200,340 205':'M20 60 C140 60,200 120,240 170 C270 200,300 205,340 205';
+   let s=`<rect width="360" height="240" fill="var(--wall)"/><rect y="180" width="360" height="60" fill="#c9b99c"/>`;
+   s+=h.spot('gap',`<path d="${d}" stroke="transparent" stroke-width="34" fill="none"/><path class="glow" d="${d}" stroke="#9aa3ab" stroke-width="12" fill="none" stroke-linejoin="round"/><text x="24" y="44" class="lb">Ống cấp nước${k?' – bị gập':''}</text>`);
+   return s;
+  }
+ },
+
+ ongxa:{
+  ten:'Ống xả', ngoai:true, spots:['vi-tri'], pins:[],
+  goiY:'Cầm tay rồi chạm ống xả để kiểm tra vị trí ống xả và đầu ống trong cống.',
+  zoom(h){
+   const k=h.badNow('vi-tri'),d=k?'M40 120 C60 200,120 205,200 205 L262 214':'M40 120 C60 40,140 30,200 50 C250 70,262 120,262 196';
+   let s=`<rect width="360" height="240" fill="var(--wall)"/><rect y="200" width="360" height="40" fill="#c9b99c"/><rect x="0" y="80" width="44" height="120" fill="#24282c"/>`;
+   s+=`<ellipse cx="262" cy="206" rx="34" ry="8" fill="#555"/>`+(k?'':`<rect x="186" y="34" width="10" height="26" fill="#888"/>`);
+   s+=h.spot('vi-tri',`<path d="${d}" stroke="transparent" stroke-width="30" fill="none"/><path class="glow" d="${d}" stroke="#7d8790" stroke-width="12" fill="none"/><text x="60" y="${k?150:24}" class="lb">${k?'Ống xả nằm sàn, cắm sâu xuống cống':'Ống xả treo đúng độ cao'}</text>`);
+   return s;
+  }
+ },
+
  van:{
   ten:'Van cấp nước', slot:[108,104], anchor:[44,8],
   spots:['luoi-loc'], pins:['T1','T2'],

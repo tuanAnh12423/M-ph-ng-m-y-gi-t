@@ -69,7 +69,7 @@ window.May3D = (function(){
   buildMachine();buildFaucet();buildSocket();
   // lớp nút đổi góc nhìn
   const vb=document.createElement('div');vb.className='m3v';
-  vb.innerHTML='<button data-v="truoc">Mặt trước</button><button data-v="sau">Mặt sau</button><button data-v="tren">Trên xuống</button>';
+  vb.innerHTML='<button data-v="truoc">Trước</button><button data-v="sau">Sau</button><button data-v="ong">Ống cấp/xả</button><button data-v="tren">Trên</button>';
   vb.onclick=e=>{const b=e.target.closest('[data-v]');if(b)view(b.dataset.v)};el.appendChild(vb);
   new ResizeObserver(resize).observe(el);resize();
   renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});
@@ -158,8 +158,10 @@ window.May3D = (function(){
   g.add(at(cyl(0.014,0.014,0.05,MAT.chrome,16),-0.56,1.14,-0.22));                             // đầu ra
   const hit=new T.Mesh(new T.BoxGeometry(0.16,0.16,0.16),new T.MeshBasicMaterial({visible:false}));at(hit,-0.57,1.17,-0.22);g.add(hit);
   pickable(g,{part:'voi'});O.faucet=g;
-  // ống cấp từ vòi tới van (sau máy)
-  scene.add(tube([[-0.56,1.115,-0.22],[-0.55,0.95,-0.32],[-0.42,0.9,-0.45],[-0.26,0.97,-0.38],[-0.2,0.985,-0.335]],0.011,MAT.hose));
+  O.hose=new T.Group();scene.add(O.hose);O.drain=new T.Group();scene.add(O.drain);
+  // cống thoát sàn
+  const grate=new T.Mesh(new T.CircleGeometry(0.07,32),M(0xffffff,{map:canvasTex(128,128,(c,w,h)=>{c.fillStyle='#8f969c';c.beginPath();c.arc(64,64,64,0,7);c.fill();c.fillStyle='#202326';for(let i=0;i<6;i++)c.fillRect(22,24+i*14,84,7)}),metalness:.6,roughness:.4}));
+  grate.rotation.x=-Math.PI/2;at(grate,-0.15,0.003,-0.56);scene.add(grate);
   O.lVoi=label('Vòi nước',[-0.56,1.29,-0.22],'front',{part:'voi'});
  }
  function buildSocket(){
@@ -170,6 +172,29 @@ window.May3D = (function(){
   pickable(g,{act:'phich'});
   O.plug=new T.Group();scene.add(O.plug);
   O.lSocket=label('Ổ điện',[-0.62,0.55,0.18],'front',{act:'phich'});
+ }
+ // ống cấp (gập hay không) và ống xả (đúng / sai vị trí) — dựng lại theo từng ca
+ function buildHoses(){
+  const dau=S.v.dau||[],kink=S.v.hong.includes('ongcap'),low=S.v.hong.includes('ongxa');
+  for(let i=picks.length-1;i>=0;i--)if(picks[i].userData.hose)picks.splice(i,1);
+  O.hose.clear();O.drain.clear();
+  if(O.hoseLabels)O.hoseLabels.forEach(L=>{L.d.remove();labels.splice(labels.indexOf(L),1)});O.hoseLabels=[];
+  const inlet=kink?[[-0.56,1.115,-0.22],[-0.55,0.95,-0.32],[-0.47,0.86,-0.44],[-0.43,0.99,-0.47],[-0.38,0.85,-0.47],[-0.27,0.97,-0.39],[-0.2,0.985,-0.335]]
+                  :[[-0.56,1.115,-0.22],[-0.55,0.95,-0.32],[-0.42,0.9,-0.45],[-0.26,0.97,-0.38],[-0.2,0.985,-0.335]];
+  O.hose.add(tube(inlet,0.011,MAT.hose));
+  const hit=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(inlet.map(p=>new T.Vector3(...p))),24,0.04,6,false),new T.MeshBasicMaterial({visible:false}));O.hose.add(hit);
+  pickable(O.hose,{part:'ongcap'});
+  const dm=M(0x5b6167,{roughness:.7});
+  const drain=low?[[0.15,0.1,-0.31],[0.12,0.03,-0.42],[-0.02,0.02,-0.5],[-0.12,0.015,-0.555],[-0.15,-0.06,-0.56]]
+                 :[[0.15,0.1,-0.31],[0.15,0.4,-0.37],[0.1,0.8,-0.39],[0.02,0.86,-0.41],[-0.08,0.76,-0.46],[-0.14,0.4,-0.53],[-0.15,0.05,-0.56]];
+  O.drain.add(tube(drain,0.013,dm));
+  const dh=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(drain.map(p=>new T.Vector3(...p))),24,0.045,6,false),new T.MeshBasicMaterial({visible:false}));O.drain.add(dh);
+  if(!low)O.drain.add(at(box(0.04,0.03,0.03,MAT.dark),0.02,0.87,-0.41));            // móc treo ống xả
+  O.water=new T.Mesh(new T.RingGeometry(0.02,0.06,24),new T.MeshBasicMaterial({color:0x5fb4ff,transparent:true,opacity:0}));O.water.rotation.x=-Math.PI/2;at(O.water,-0.15,0.006,-0.56);O.drain.add(O.water);
+  pickable(O.drain,{part:'ongxa'});
+  [O.hose,O.drain].forEach(g=>g.traverse(x=>{if(x.isMesh)x.userData.hose=1}));
+  O.hoseLabels.push(label('Ống cấp',[-0.43,1.06,-0.47],'back',{part:'ongcap'}),label('Ống xả',low?[-0.05,0.12,-0.5]:[0.02,0.97,-0.41],'back',{part:'ongxa'}));
+  O.low=low;
  }
  function placePlug(on){
   for(let i=picks.length-1;i>=0;i--)if(picks[i].userData.plug)picks.splice(i,1);
@@ -210,7 +235,7 @@ window.May3D = (function(){
  }
 
  /* ---------- góc nhìn ---------- */
- const VIEWS={truoc:[[1.05,1.38,1.62],[-0.12,0.72,0]],sau:[[0.32,1.32,-0.92],[0,0.97,-0.24]],tren:[[0.3,2.35,0.75],[-0.05,0.8,0]]};
+ const VIEWS={ong:[[0.95,1.35,-1.75],[-0.2,0.55,-0.42]],truoc:[[1.05,1.38,1.62],[-0.12,0.72,0]],sau:[[0.32,1.32,-0.92],[0,0.97,-0.24]],tren:[[0.3,2.35,0.75],[-0.05,0.8,0]]};
  function view(k,instant){const[p,t]=VIEWS[k];if(instant){cam.position.set(...p);ctrl.target.set(...t);ctrl.update();return}
   Object.assign(tween,{t:0,p0:cam.position.clone(),t0:ctrl.target.clone(),p1:new T.Vector3(...p),t1:new T.Vector3(...t)})}
 
@@ -236,6 +261,7 @@ window.May3D = (function(){
   if(tween.t<1){tween.t=Math.min(1,tween.t+0.04);const k=1-Math.pow(1-tween.t,3);cam.position.lerpVectors(tween.p0,tween.p1,k);ctrl.target.lerpVectors(tween.t0,tween.t1,k)}
   ctrl.update();
   const b=Math.floor(performance.now()/500)%2===0;if(b!==O.blink){O.blink=b;O.dispTex.userData.draw()}
+  if(O.water){const run=S&&S.dien===3&&O.low;O.water.material.opacity=run?0.5+0.4*Math.sin(performance.now()/150):0;O.water.scale.setScalar(run?1+0.25*Math.sin(performance.now()/200):1)}
   renderer.render(scene,cam);
   const w=el.clientWidth,h=renderer.domElement.clientHeight;
   const cz=cam.position.z;labels.forEach(L=>{if(L.hide||(L.side==='front'&&cz<0.1)||(L.side==='back'&&cz>-0.1)){L.d.style.display='none';return}tmp.copy(L.p).project(cam);
@@ -248,11 +274,12 @@ window.May3D = (function(){
  function update(state){
   S=state;if(!built)build();
   if(O.insideCode!==S.code)buildInside(S.E);
+  if(last.caseId!==S.caseId){buildHoses();last.caseId=S.caseId}
   if(last.dien!==S.dien){placePlug(S.dien>0);last.dien=S.dien}
   const on=(m,c)=>{m.material.emissive.setHex(c);m.material.emissiveIntensity=c?1.2:0};
   on(O.btnN,S.dien>=2?0x2fa35a:0);on(O.btnS,S.dien===3?0x2fa35a:0);
   O.btnMat[0].material.color.setHex(S.dien>=2?0x3cc46e:0xc9ced3);O.btnMat[1].material.color.setHex(S.dien===3?0x3cc46e:0xc9ced3);
-  O.lever.rotation.y=S.v.hong.includes('voi')?0.35:Math.PI/2;   // song song ống = mở, gần vuông góc = gần khóa
+  O.lever.rotation.y=(S.v.dau||[]).includes('voi-khoa')?0.35:Math.PI/2;   // song song ống = mở, gần vuông góc = gần khóa
   O.cover.visible=S.nap;O.lNap.hide=!S.nap;
   O.inside.visible=!S.nap;O.partLabels.forEach(L=>L.hide=S.nap);
   if(last.nap&&!S.nap)view('sau');
